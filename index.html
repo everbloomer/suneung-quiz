@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>수능 응시 자격평가</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Serif+KR:wght@500;700;900&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: 수능 문제지·OMR 답안지 은유. 한 장의 시험지를 위에서 아래로 풀고, 하단 고정 바에서 제출 → 채점표·해설로 전환 */
+:root{
+  --paper:#f6f7f9; --sheet:#ffffff; --ink:#1b2130; --muted:#5a6273; --line:#dde1e8;
+  --omr:#c8455a; --omr-soft:#fbe9ec; --good:#1d7a52; --good-soft:#e5f4ec; --bad:#b8323f; --bad-soft:#fbe8ea;
+  --part:#9a6a0a; --part-soft:#fbf2dc; --mark:#141821;
+  --f-q:"Noto Serif KR","Nanum Myeongjo","Batang",serif;
+  --f-ui:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#12151b; --sheet:#1a1e26; --ink:#e7e9ee; --muted:#a3aab8; --line:#2d3340;
+  --omr:#ef7d8e; --omr-soft:#3a2229; --good:#5cc995; --good-soft:#163026; --bad:#f2808b; --bad-soft:#3a1d22;
+  --part:#e3b55a; --part-soft:#33291a; --mark:#e7e9ee; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12151b; --sheet:#1a1e26; --ink:#e7e9ee; --muted:#a3aab8; --line:#2d3340;
+  --omr:#ef7d8e; --omr-soft:#3a2229; --good:#5cc995; --good-soft:#163026; --bad:#f2808b; --bad-soft:#3a1d22;
+  --part:#e3b55a; --part-soft:#33291a; --mark:#e7e9ee; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--omr);outline-offset:2px}
+
+/* 표지 */
+.cover{background:var(--sheet);border:2px solid var(--ink);display:grid;grid-template-columns:1fr auto}
+.cover .main{padding:18px 20px;border-right:2px solid var(--ink);min-width:0}
+.cover .eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.cover h1{font-family:var(--f-q);font-weight:900;font-size:clamp(22px,5vw,30px);line-height:1.25;margin:4px 0 6px;text-wrap:balance}
+.cover .sub{color:var(--muted);font-size:13px;margin:0}
+.cover .id{display:grid;grid-template-rows:repeat(3,auto);min-width:170px}
+.cover .id label{display:grid;grid-template-columns:44px 1fr;align-items:center;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted);font-weight:600}
+.cover .id label:last-child{border-bottom:0}
+.cover .id span{padding:10px 0 10px 12px}
+.cover .id input{border:0;background:transparent;color:var(--ink);font:500 15px var(--f-ui);padding:10px 12px 10px 4px;width:100%;min-width:0}
+.meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted)}
+.meta b{color:var(--ink);font-family:var(--f-num);font-weight:600}
+.notice{background:var(--sheet);border:1px solid var(--line);padding:12px 16px;font-size:13px;color:var(--muted)}
+.notice ul{margin:0;padding-left:18px}
+
+/* 문항 */
+.q{background:var(--sheet);border:1px solid var(--line);padding:18px 20px 20px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+.q-head{display:flex;gap:10px;align-items:baseline}
+.q-no{font-family:var(--f-q);font-weight:900;font-size:22px;font-style:italic;min-width:1.6em}
+.q-no.sa{font-style:normal;font-size:15px;font-family:var(--f-ui);font-weight:700;border:1.5px solid var(--ink);padding:0 6px;white-space:nowrap}
+.q-text{font-family:var(--f-q);font-weight:500;font-size:16.5px;line-height:1.65;flex:1;min-width:0}
+.q-text u{text-underline-offset:3px;text-decoration-thickness:2px;font-weight:700}
+.pts{font-family:var(--f-num);font-size:12.5px;color:var(--muted);white-space:nowrap}
+.hint{font-size:12.5px;color:var(--omr);font-weight:600;margin-top:-6px}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opt{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;text-align:left;background:transparent;border:1px solid transparent;color:var(--ink);padding:8px 10px;border-radius:6px;font-family:var(--f-q);font-size:15px;line-height:1.6}
+.opt:hover{background:var(--omr-soft)}
+.opt:disabled{cursor:default}
+.opt:disabled:hover{background:transparent}
+.bub{width:30px;height:20px;border:1.5px solid var(--omr);border-radius:50%;display:grid;place-items:center;font:600 12px var(--f-num);color:var(--omr);margin-top:2px;transition:background .12s}
+.opt[aria-pressed="true"] .bub{background:var(--mark);border-color:var(--mark);color:transparent}
+.opts.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.opts.grid .opt{font-family:var(--f-ui);font-size:14.5px;border-color:var(--line)}
+
+/* 채점 후 상태 */
+.opt.is-ans{background:var(--good-soft);border-color:var(--good)}
+.opt.is-ans .bub{border-color:var(--good);color:var(--good)}
+.opt.is-ans[aria-pressed="true"] .bub{background:var(--good);border-color:var(--good)}
+.opt.is-wrong{background:var(--bad-soft);border-color:var(--bad)}
+.opt.is-wrong .bub{background:var(--bad);border-color:var(--bad)}
+.opt.is-neutral{border-color:var(--line);border-style:dashed}
+.tag{font:600 11.5px var(--f-ui);padding:1px 7px;border-radius:99px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+.tag.g{background:var(--good);color:var(--sheet)} .tag.b{background:var(--bad);color:var(--sheet)} .tag.n{border:1px solid var(--muted);color:var(--muted)}
+.verdict{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.verdict .stamp{font-family:var(--f-q);font-size:20px;font-weight:900;width:38px;height:38px;border:2.5px solid currentColor;border-radius:50%;display:grid;place-items:center;transform:rotate(-8deg)}
+.verdict.ok{color:var(--good)} .verdict.no{color:var(--bad)} .verdict.pt{color:var(--part)}
+.exp{border-top:1px dashed var(--line);padding-top:14px;display:flex;flex-direction:column;gap:10px;font-size:14.5px}
+.exp p{margin:0}
+.exp .lead{font-weight:600}
+.exp ul{margin:0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.exp li{display:grid;grid-template-columns:24px 1fr;gap:6px;color:var(--muted)}
+.exp li b{color:var(--ink);font-family:var(--f-num);font-weight:600}
+.exp li.mine{color:var(--ink)}
+.ref{font-size:12.5px;background:var(--paper);border-left:3px solid var(--omr);padding:8px 12px;color:var(--muted)}
+.ref b{color:var(--ink)}
+
+/* 결과 */
+.result{background:var(--sheet);border:2px solid var(--ink);padding:22px 20px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.score{font-family:var(--f-num);font-weight:600;font-size:64px;line-height:1;letter-spacing:-.02em}
+.score small{font-size:20px;color:var(--muted)}
+.result h2{margin:0 0 4px;font-family:var(--f-q);font-size:20px;text-wrap:balance}
+.result p{margin:0;color:var(--muted);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip{border:1px solid var(--line);background:var(--paper);color:var(--ink);font:600 13px var(--f-num);padding:4px 10px;border-radius:99px}
+.chip.no{border-color:var(--bad);color:var(--bad);background:var(--bad-soft)}
+.chip.pt{border-color:var(--part);color:var(--part);background:var(--part-soft)}
+.history{grid-column:1/-1;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+.history b{font-family:var(--f-num);color:var(--ink)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--sheet);color:var(--muted);padding:7px 14px;font-weight:600;font-size:13.5px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--sheet)}
+
+/* 하단 바 */
+.bar{position:fixed;left:0;right:0;bottom:0;background:var(--sheet);border-top:2px solid var(--ink);z-index:5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.bar .in{max-width:760px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.prog{flex:1;min-width:140px;display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted)}
+.prog b{font-family:var(--f-num);color:var(--ink)}
+.track{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--omr);width:0;transition:width .2s}
+.btn{border:2px solid var(--ink);background:var(--ink);color:var(--sheet);padding:10px 18px;border-radius:8px;font-weight:700;font-size:15px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.warn{flex-basis:100%;font-size:13px;color:var(--bad);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.warn .btn{padding:6px 12px;font-size:13px}
+.foot{font-size:12px;color:var(--muted);text-align:center;line-height:1.7}
+@media (max-width:560px){
+  .cover{grid-template-columns:1fr}.cover .main{border-right:0;border-bottom:2px solid var(--ink)}
+  .cover .id{grid-template-columns:repeat(3,1fr);grid-template-rows:auto}
+  .cover .id label{grid-template-columns:1fr;border-bottom:0;border-right:1px solid var(--line)}
+  .cover .id label:last-child{border-right:0}
+  .cover .id span{padding:8px 10px 0}.cover .id input{padding:2px 10px 10px}
+  .result{grid-template-columns:1fr}.score{font-size:54px}
+  .q{padding:16px 14px 18px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap" id="app">
+  <header class="cover">
+    <div class="main">
+      <div class="eyebrow">행신고등학교 3학년부 · 공통과정</div>
+      <h1>2027학년도 대학수학능력시험 응시 자격평가</h1>
+      <p class="sub">근거: 경기도교육청 「2027학년도 대학수학능력시험 수험생 유의사항」</p>
+    </div>
+    <div class="id">
+      <label><span>반</span><input id="f-ban" inputmode="numeric" maxlength="2" autocomplete="off"></label>
+      <label><span>번호</span><input id="f-no" inputmode="numeric" maxlength="2" autocomplete="off"></label>
+      <label><span>이름</span><input id="f-name" maxlength="10" autocomplete="off"></label>
+    </div>
+  </header>
+  <div class="meta">
+    <span>수능일 <b>2026. 11. 19.(목)</b></span>
+    <span>입실 완료 <b>08:10</b></span>
+    <span>선택형 <b>13</b> · 단답형 <b>2</b></span>
+    <span>총점 <b>100</b>점</span>
+  </div>
+  <div class="notice" id="notice">
+    <ul>
+      <li>보기의 타원(⬭)을 누르면 컴퓨터용 사인펜으로 마킹하듯 칠해집니다. 다시 누르면 바뀝니다.</li>
+      <li>단답형은 해당하는 것을 모두 골라 마킹합니다. 틀린 것을 고르면 감점됩니다.</li>
+      <li>제출하면 바로 채점되고, 문항마다 유의사항 근거와 해설이 나옵니다.</li>
+    </ul>
+  </div>
+  <div id="result" hidden></div>
+  <div class="toolbar" id="tools" hidden>
+    <div class="seg" role="group" aria-label="해설 보기 범위">
+      <button id="v-all" aria-pressed="true">전체 문항</button>
+      <button id="v-wrong" aria-pressed="false">틀린 문항만</button>
+    </div>
+  </div>
+  <main id="qs" class="wrap" style="gap:16px"></main>
+  <p class="foot">문항: 행신고등학교 3학년부 「수능 응시 자격평가」(2026. 10. 30.)<br>해설 근거: 경기도교육청 「2027학년도 대학수학능력시험 수험생 유의사항」, 대학수학능력시험 관리규정 제19조<br>세부 사항은 한국교육과정평가원 수능 홈페이지(www.suneung.re.kr)에서 확인하세요.</p>
+</div>
+
+<div class="bar" id="bar">
+  <div class="in">
+    <div class="prog" id="prog"><span>응답 <b id="cnt">0</b> / <b id="tot">15</b></span><div class="track"><i id="trk"></i></div></div>
+    <button class="btn" id="submit">제출하고 채점하기</button>
+    <div class="warn" id="warn" hidden></div>
+  </div>
+</div>
+
+<script>
+const C="①②③④⑤";
+const Q=[
+{n:1,type:"single",pts:5,q:"수험생이 시험실에 입실 완료해야 하는 시간으로 옳은 것은?",
+ opts:["오전 5시 50분","오전 8시 10분","오전 8시 30분","오전 9시","오전 9시 10분"],ans:2,
+ exp:"모든 수험생은 시험 당일(2026. 11. 19. 목) 오전 8시 10분까지 지정된 시험실에 입실해 본인 수험번호가 붙은 좌석에 앉아 대기해야 합니다. 1교시를 선택하지 않은 수험생도 8시 10분까지 입실해야 하고, 시험이 시작된 뒤에는 시험실에 들어갈 수 없습니다.",
+ why:{3:"8시 25분 예비령, 8시 35분 준비령 이후라 이미 늦은 시각입니다.",4:"1교시 국어 본령은 8시 40분입니다. 9시는 시험 중입니다."},
+ ref:"2. 시험 당일 일반 유의사항 나·다 / 8. 수험생 필수 확인 사항 / 붙임1 시험시간표"},
+{n:2,type:"single",pts:5,q:"다음 중 수능 전날 수험생의 올바른 자세로 가장 적절한 것은?",
+ opts:["집에서 시험장까지 이동하는 교통편을 미리 확인한다.","마지막 공부 기회이니, 밤새 공부하고 바로 응시장으로 간다.","수험표를 받자마자 시험장 학교로 달려가서 건물 안으로 들어가려고 시도한다.","날씨가 추울 것을 대비해서 최대한 두꺼운 옷으로 여러 개 껴입을 준비를 한다.","수능대박을 기원하며 사람들이 준 초콜릿은 다 먹어야 효과가 있으니 모두 먹고 배탈이 났다."],ans:1,
+ exp:"예비소집에서 수험표를 받으면 선택 영역·과목이 원서 접수 내용과 같은지 확인하고, 입실 시간에 맞춰 도착할 수 있도록 시험장과 시험실 위치를 확인해야 합니다.",
+ why:{3:"예비소집 때 시험실이 설치된 건물 안으로는 출입할 수 없습니다.",2:"유의사항의 직접 규정은 아니지만 당일 컨디션 관리에 맞지 않습니다.",4:"유의사항의 직접 규정은 아니지만, 겉옷 등 소지품 정리 과정을 생각하면 얇은 옷을 겹쳐 입는 편이 낫습니다.",5:"유의사항의 직접 규정은 아니지만 당일 컨디션 관리에 맞지 않습니다."},
+ ref:"1. 예비소집일 유의사항 나"},
+{n:3,type:"single",pts:5,q:"다음 중 수능 당일 가져갈 수 있는 신분증이 <u>아닌</u> 것은?",
+ opts:["유효기간 내 청소년증","사진이 잘 나온 주민등록증","아무도 모르게 따 놓은 운전면허증","유효기간 내 주민등록증 발급신청 확인서","외국 한 번도 못 나가고 유효기간이 만료된 여권"],ans:5,
+ exp:"여권은 '기간만료 전'이면서 주민등록번호가 표시된 것만 인정됩니다(주민등록번호 미표시 여권은 여권정보증명서와 함께 제출). 유효기간이 지난 여권은 신분증으로 인정되지 않습니다.",
+ why:{1:"유효기간 내 청소년증(또는 발급신청확인서)은 인정됩니다.",2:"주민등록증은 인정됩니다.",3:"운전면허증은 인정됩니다.",4:"유효기간 내 주민등록증 발급신청확인서는 인정됩니다."},
+ extra:"모바일 신분증(모바일 주민등록증·운전면허증 등)은 시험 당일 신분 확인용으로 쓸 수 없습니다.",
+ ref:"2. 시험 당일 일반 유의사항 라 (신분증 인정 범위)"},
+{n:4,type:"single",pts:5,q:"다음 중 수능 당일 아침 상황에 잘 대처하지 <u>않은</u> 학생은?",
+ opts:["이덕양 : 경찰차, 앰뷸런스는 정말 급할 때만, 가장 좋은 방법은 비상 사태가 없게 일찍 출발하기다.","강아지 : 수험표가 없어서 8시 이전에 사진 1장을 가지고 고사 본부에 가서 초고속으로 수험표를 재발급 받았다.","진달래 : 신분증이 없어서 재빨리 고사본부로 가서 말하자, 선생님들께서 지혜롭게 도와주셨다. 언제나 감사해요.","고양이 : 8시 9분에 화장실에 갔다가 10분 후 나왔는데, 그만 길을 잃어 8시 30분까지 고사실을 찾아다녔다.","김행신 : 고사실에 착석한 후 심장이 너무 두근거리고 손이 떨렸지만, 차분히 단권화 노트를 읽으며 마음을 가라앉혔다."],ans:4,
+ exp:"8시 10분까지 지정된 시험실에 입실을 마쳐야 합니다. 8시 10분에 감독관이 들어와 유의사항 설명, 본인 확인, 사인펜·샤프 배부를 하고, 8시 25분 예비령에 답안지를 나눠 줍니다. 8시 30분까지 시험실 밖에 있었다면 입실 시간을 지키지 못한 것입니다.",
+ why:{2:"수험표 재발급은 8시까지 시험관리본부에서 가능합니다. 다만 응시원서와 같은 원판 사진 1매와 함께 신분증도 반드시 가져가야 합니다."},
+ ref:"1. 예비소집일 유의사항 다 / 2. 시험 당일 일반 유의사항 나 / 붙임1 시험시간표"},
+{n:5,type:"single",pts:5,q:"다음 중 시험장 반입 가능 물품은?",
+ opts:["가채점표 쓰지 않고 내 답안지를 찍어올 디카","점심시간, 영어 듣기 감각 up을 위한 전자 담배","2교시 수학 시험에서 나를 도와줄 친구, 계산기","시험 날도 포기할 수 없는 내 패션의 완성, 에어팟","외로운 나의 수험생활을 함께 해온 연필과 지우개"],ans:5,
+ exp:"흑색 연필과 지우개는 '시험 중 휴대 가능 물품'입니다. 이 밖에 신분증, 수험표, 검은색 컴퓨터용 사인펜, 흰색 수정테이프, 샤프심(흑색, 0.5mm), 통신·결제 기능과 전자식 화면표시기가 모두 없는 아날로그 시계, 마스크(감독관 사전 확인)를 가질 수 있습니다.",
+ why:{1:"디지털카메라는 전자기기라 반입 금지 물품입니다.",2:"전자담배는 충전식 물품이라 반입 금지 물품입니다(화장실 금속탐지 적발 사례 있음).",3:"계산기는 전자식 화면표시기가 있는 전자기기라 반입 금지 물품입니다.",4:"블루투스 이어폰은 통신 기능이 있어 반입 금지 물품입니다."},
+ extra:"반입 금지 물품을 어쩔 수 없이 가져왔다면 1교시 시작 전에 감독관에게 내야 하고, 내지 않으면 부정행위(9호)입니다.",
+ ref:"2. 시험 당일 일반 유의사항 마 – 〈시험장 반입 금지 물품〉, 〈시험 중 휴대 가능 물품〉"},
+{n:6,type:"single",pts:5,q:"다음 중 부정 행위자가 <u>아닌</u> 경우는?",
+ opts:["핸드폰 전원을 끈 후 내 가방에 넣어 복도에 두었다.","쉬는 시간에 공부하던 연습장을 서랍에 넣어두었다.","연인이 생일 선물로 사준 샤프로 열심히 문제를 풀었다.","0.5mm 흑색 샤프심과 흰색 수정테이프를 가져가서 사용하였다.","같은 교실에 무섭게 생긴 삼수생 형이 자꾸 보여 달라고 해서 점심시간에 제대로 맞을까 봐 보여드렸다."],ans:4,
+ exp:"샤프심(흑색, 0.5mm)과 흰색 수정테이프는 개인이 가져가 쓸 수 있는 물품입니다. 개인이 지참할 수 있는 필기구는 검은색 컴퓨터용 사인펜, 흑색 연필, 흰색 수정테이프, 지우개, 샤프심(0.5mm)뿐입니다.",
+ why:{1:"전원을 꺼서 가방에 넣어 두어도 1교시 전 제출하지 않으면 부정행위입니다(붙임2 사례1, 9호).",2:"휴대 가능 물품 외 물품을 감독관 안내와 달리 서랍에 둔 것은 부정행위입니다(붙임2 사례6, 10호).",3:"샤프는 감독관이 일괄 지급하며 개인 샤프는 휴대할 수 없습니다. 시험 중 적발 시 압수되고, 압수에 따르지 않으면 부정행위로 처리될 수 있습니다.",5:"답안지를 보여주는 행위는 1호 부정행위로, 당해 시험 무효에 다음 해 응시자격까지 정지됩니다."},
+ ref:"2. 시험 당일 일반 유의사항 다·마 / 6. 부정행위 가 / 붙임2 사례1·6"},
+{n:7,type:"multi",pts:5,q:"다음 중 수능시험 볼 때 책상 위에 올려놓으면 <u>안 되는 것 세 가지</u>는?",hint:"세 개를 모두 골라야 정답입니다.",
+ opts:["수험표와 신분증","고급스러운 전자시계","예비 마킹용 빨간 플러스펜","문제 풀이용 연습장과 이면지","당일 공짜로 지급 받은 컴싸와 샤프"],ans:[2,3,4],
+ exp:"전자시계는 시험장 반입 금지 물품이고, 예비마킹용 플러스펜과 연습장은 '시험 중 휴대 가능 물품 외 물품'이라 시험 중 적발되면 압수됩니다.",
+ why:{1:"수험표와 신분증은 반드시 가져와 책상 위에 놓아두어야 합니다.",2:"전자식 화면표시기가 있는 시계는 반입 금지입니다. 3교시 시계 확인 때 적발돼 부정행위 처리된 사례가 있습니다(붙임2 사례5).",3:"예비마킹용 플러스펜은 압수 대상입니다. 답안지에 사인펜 외 흔적이 남으면 중복 답안으로 채점될 수 있습니다.",4:"연습장은 압수 대상입니다. 문제 풀이는 문제지 여백에 합니다.",5:"감독관이 지급한 컴퓨터용 사인펜과 샤프는 시험 중에 사용합니다."},
+ ref:"2. 시험 당일 일반 유의사항 라·마 / 3. 답안지 기입 시 유의사항 가 / 붙임2 사례5"},
+{n:8,type:"single",pts:5,q:"다음 중 고사본부로 끌려갈 이유가 전혀 <u>없는</u> 학생은?",
+ opts:["강아지 : 탐구 영역 1교시에 2교시 문제도 같이 올려 두고 재빨리 다 풀어버림.","고양이 : 수험번호는 홀수로 끝나지만 내 주민등록번호는 짝수로 끝나므로 짝수형에 마킹♡","김행신 : 수험생 본인 여부 확인을 위해 마스크를 잠시 내리라고 했지만, 초상권이 염려되어 끝까지 버팀.","이덕양 : 화장실에 가고 싶어 조용히 손들어 의사를 밝힌 후 복도감독 금속 탐지기 순순히 응하고, 감독관이 지정된 칸에 들어감.","진달래 : 종이 치고 감독관이 모든 필기구를 놓으라고 했지만, 가채점표를 완성하기 위해 못 들은 척하고 수험표 뒷면 정답을 모두 옮겨 적음."],ans:4,
+ exp:"시험 중 문의할 일이 있으면 조용히 손을 들어 의사를 표시합니다. 시험 중 화장실을 이용하는 수험생은 모두 금속탐지기 등으로 반입 금지 물품 소지 여부를 확인받습니다.",
+ why:{1:"제1선택 시간에 두 과목 문제지를 동시에 보는 행위는 7호 부정행위입니다.",2:"문형은 수험번호 끝자리로 정합니다(홀수→홀수형, 짝수→짝수형). 문형을 잘못 표기하면 불이익을 받습니다.",3:"감독관의 본인 확인 요구에 따르지 않으면 8호 부정행위입니다. 마스크를 잠시 내리는 등 협조해야 합니다.",5:"종료령 뒤 답안 작성(6호)도, 가채점표 작성·수정도 부정행위입니다."},
+ ref:"2. 시험 당일 일반 유의사항 바 / 3. 답안지 기입 라 / 4. 매 교시 수험 유의사항 다·라 / 붙임2 사례2"},
+{n:9,type:"single",pts:7,q:"다음 중 수능 응시와 관련된 올해 달라진 점으로 <u>틀린</u> 것은?",
+ opts:["올해부터 수험표 뒷면에 가채점표가 인쇄된다. 따로 스티커를 붙이지 않아도 시험 시간 중 내 답을 기록할 수 있다.","검은색 컴퓨터용 사인펜을 개인적으로 가져와 사용할 수 있다. 물론 시험실에서도 지급하니, 내 사인펜이 없다고 눈물 흘릴 필요는 없다.","스마트안경은 시험장 반입 금지 물품에 명시되었다. 아무리 똑똑한 안경이라도 수능에서는 감독관의 눈을 피할 수 없다.","준비령이 울려 문제지를 받은 뒤에는 시험을 포기하더라도 해당 영역이 끝날 때까지 퇴실할 수 없다. 마음은 이미 집에 가 있어도 몸은 시험실에 남아 있어야 한다.","매 교시 종료령이 울린 뒤에도 수험표 뒷면의 가채점표를 완성해도 된다. 감독관이 펜을 놓으라고 해도 내 점수만큼은 끝까지 책임지는 것이 진정한 수험생의 자세다."],ans:5,
+ exp:"종료령 이후에 가채점표를 작성하거나 고치는 행위도 부정행위입니다. 수험표 뒷면 가채점표는 시험 시간 중, 또는 감독관이 퇴실한 쉬는 시간에만 쓸 수 있습니다.",
+ why:{1:"올해부터 수험표 뒷면에 가채점표가 인쇄됩니다.",2:"검은색 컴퓨터용 사인펜은 개인 지참이 가능하고, 1교시 전에 시험실에서도 일괄 지급합니다. 단 다른 기능이 섞인 사인펜은 쓸 수 없습니다.",3:"스마트안경은 반입 금지 물품입니다. 시험 중 착용만 해도 3호 부정행위로 당해 시험 무효에 다음 해 응시자격까지 정지됩니다.",4:"매 교시 시험 종료 전에는 시험실 밖으로 나갈 수 없습니다. 이는 올해 새로 생긴 규정이 아니라 기존부터 적용된 원칙입니다."},
+ ref:"2. 시험 당일 일반 유의사항 마·사·타 / 3. 답안지 기입 가 / 4. 매 교시 수험 유의사항 라"},
+{n:10,type:"single",pts:7,q:"다음 중 '수능 시행 당일 지진 발생 시 대처 요령'으로 <u>틀린</u> 것은?",
+ opts:["진동이 약하게 느껴지면, 놀라지 말고 감독관의 안내에 따라 조용히 시험을 계속 본다. 점수는 흔들리지 않는다.","진동이 크고 천장재가 떨어지는 등 위험할 경우, 책상 아래로 대피한 뒤 감독관의 지시에 따라 교실 밖으로 이동한다. 이때 책상은 생각보다 믿음직하다.","진동이 느껴지면 '이건 망했구나' 싶더라도 일단 침착하게 감독관 지시를 기다려야 하지만, 나는 평소에 재빠른 편이라 지시 없이 먼저 운동장으로 뛰쳐나가며 \"살고 보자!\"를 외쳤다.","진동이 멈춘 뒤 시험이 재개되면, 시험장 책임자가 수험생의 안정을 위해 약 10분의 안정시간을 부여하고 종료 시각을 연장할 수 있다. 연장 시간 동안 잠들지 않게 정신을 바짝 차리고 대기한다.","불안이 심한 수험생은 감독관 허락을 받아 보건실 등 별도 시험실로 이동하여 안정 후 응시할 수 있다. 이때 심박수 120이 넘어서 내 심장에서도 진동이 감지되더라도 침착함을 유지하도록 한다."],ans:3,
+ exp:"시험 중 돌발 상황이 생기면 수험생은 감독관의 지시에 따라 침착하게 대응해야 합니다. 지시 없이 시험실을 떠나면 무단이탈이 되어, 이탈한 시점부터 시험 응시가 금지됩니다.",
+ why:{1:"진동이 경미하면 시험을 계속 치르는 것이 원칙입니다.",2:"진동이 커서 피해가 우려되면 시험을 중단하고 감독관 지시에 따라 대피합니다."},
+ extra:"참고: 지진 단계별 세부 조치(안정시간, 시간 연장, 별도 시험실 이동 등)는 경기도교육청 유의사항에는 실려 있지 않고, 교육부의 수능 지진 대처 행동요령에 따릅니다. 당일에는 감독관 안내를 그대로 따르면 됩니다.",
+ ref:"8. 수험생 필수 확인 사항(돌발 상황 시 감독관 지시) / 2. 시험 당일 일반 유의사항 타(무단이탈)"},
+{n:11,type:"single",pts:8,q:"다음 중 부정행위가 <u>아닌</u> 것은?",
+ opts:["점심시간에 게임을 하려고 외투에 공기계(휴대폰)를 뒀는데, 시험 중 \"카톡왔숑!\"이라고 소리가 났다.","4교시 탐구 영역 시험지를 받고, 제1선택 시험지 1부만 책상 위에 올려 놓고 나머지 문제지는 개인 문제지 보관용 봉투에 넣어 바닥에 보관했다.","답안지 마킹까지 끝난 후 종료령이 울렸다. 담임 선생님이 주신 가채점표를 못쓴 게 아까워서 하나씩 정확하게 확인하며 작성했다. 점수가 기대되었다.","감기에 걸려 따뜻한 물을 마시기 위해 온도 표시 기능이 있는 보온 텀블러를 챙겨 왔다. 온도가 70℃로 유지되는 걸 보며 '내 점수도 이 정도로만 유지되면 좋겠다'고 생각했다.","4교시 탐구영역에서 1선택은 '한국지리', 2선택은 '정치와 법'이었다. 그런데 1선택 시간에 '세계지리' 문제지를 꺼내놓은 것을 확인한 순간 본령이 울리자, 개인용 보관 봉투에서 황급히 '한국지리' 문제지를 꺼내다가 감독관과 눈이 마주쳤다."],ans:2,
+ exp:"4교시 탐구 2과목 선택자는 제1선택 과목 문제지 한 부만 책상 위에 두고, 제2선택 과목 문제지를 포함한 나머지 문제지(표지 포함)는 개인 문제지 보관용 봉투에 넣어 바닥에 내려놓아야 합니다. 정해진 절차 그대로입니다.",
+ why:{1:"휴대폰은 공기계라도 반입 금지 물품이며, 1교시 전에 내지 않으면 부정행위입니다(9호, 시험 중 사용이면 3호).",3:"종료령 이후 가채점표를 작성·수정하는 행위도 부정행위입니다.",4:"온도가 숫자로 표시되는 텀블러는 '전자식 화면표시기가 있는 텀블러'로 반입 금지 물품입니다.",5:"제1·2선택 과목이 아닌 다른 과목 문제지가 책상 위에 있으면 회수되며, 봉투 속 본인 선택과목 문제지와 바꿀 수 없습니다. 2026학년도 수능에서는 탐구 응시 방법 위반으로 74명이 시험 무효 처리되었습니다."},
+ ref:"4. 매 교시 수험 유의사항 나-5), 라 / 5. 4교시 수험 요령 차 / 붙임3"},
+{n:12,type:"single",pts:6,q:"&lt;보기&gt;의 수험번호 <b style=\"font-family:var(--f-num)\">36 19 01 16</b>에 대해 이해한 내용으로 적절하지 <u>않은</u> 것은?",
+ opts:["36은 시험지구를 의미한다.","19는 시험장 번호이며, 내가 가야 할 학교 번호를 의미한다.","01은 시험실 번호이며, 내가 시험을 보기 위해 들어가야 하는 교실 번호이다.","16은 고사실 안에서 내 책상 번호이며, 내 마음에 안들면 마음에 드는 자리로 가서 앉는다.","수험번호는 예비 소집일 정해진 시간 이후 수험표를 받아야 확인할 수 있다."],ans:4,
+ exp:"수험생은 반드시 지정된 시험장의 시험실에서, 본인의 수험번호가 부착된 좌석에 앉아야 합니다. 자리를 마음대로 바꿀 수 없습니다. 감독관은 책상에 붙은 문형(홀·짝수형)도 함께 확인합니다.",
+ why:{5:"예비소집에 참여해 수험표를 받아야 하며, 받은 뒤 수험표의 선택 영역·과목과 시험장·시험실 위치를 확인합니다."},
+ extra:"수험번호 각 자리(시험지구·시험장·시험실·좌석)의 뜻은 유의사항 문서에 따로 나오지 않으므로, 받은 수험표의 표기를 기준으로 확인하세요.",
+ ref:"1. 예비소집일 유의사항 가·나 / 2. 시험 당일 일반 유의사항 나"},
+{n:13,type:"single",pts:7,q:"다음 중 실컷 시험 잘 보다가 4교시에 부정행위로 적발된 사람은?",
+ opts:["진달래: 수험표에 나와 있는 선택과목 확인 후 그 순서대로 풀었다.","김행신: 한국사 공부를 안 해서 한국사를 미응시하고 싶었으나 3번으로 찍었다.","강아지: 선택과목이 아닌 시험지는 표지 포함 모두 봉투에 넣어 바닥에 내려 놓았다.","이덕양: 최저를 맞출 자신도 있고, 수시를 하향 지원했으므로, 불안해하지 말고 준비령이 울린 후 두 개의 선택 과목 시험지를 먼저 꺼내 수험번호와 이름을 적었다.","고양이: 1선택 시간에 모르고 2선택 과목 시험지를 잘못 꺼내서 2선택 과목을 풀고 2선택 답안을 작성한 후, 2선택 시간에 1선택을 풀고 1선택 답안을 작성하였다."],ans:5,
+ exp:"제1선택 시간에 제2선택 과목 문제지를 보는 것은 7호 부정행위이고, 제1선택 시험이 끝난 뒤 제1선택 답안을 작성·수정하는 것은 6호 부정행위입니다. 실수였더라도 당해 시험 전체가 무효가 됩니다. 2026학년도 수능에서 제2선택 시간에 제1선택 답안을 작성·수정해 53명이 무효 처리되었습니다.",
+ why:{1:"수험표 스티커의 선택과목 순서대로 응시하고 같은 순서로 답란에 표기해야 합니다.",2:"한국사는 응시하지 않으면 수능 성적 전체가 무효입니다. 응시했으니 문제없습니다.",3:"선택하지 않은 과목 문제지는 봉투에 넣어 바닥에 둡니다.",4:"준비령 뒤 제1·2선택 문제지를 빼내 상단에 성명, 수험번호, 응시 순서(1 또는 2)를 쓰는 것이 정해진 절차입니다."},
+ ref:"5. 4교시 한국사 영역 및 탐구 영역의 수험 요령 차·카 / 6. 부정행위 6·7호 / 붙임2 사례7·8"},
+{n:"단답형 1",type:"pick",pts:10,q:"홀수형, 짝수형의 문형과 자신이 선택한 과목이 모두 정확한지 확인해야 하는 두 영역을 모두 고르시오.",hint:"맞게 고른 영역마다 5점, 잘못 고른 영역마다 5점 감점",
+ opts:["국어","수학","영어","한국사","탐구"],correct:[1,2],wrong:[3,4,5],each:5,
+ exp:"문형(홀·짝수형) 구분이 있는 것은 1·2·3교시(국어·수학·영어)와 4교시 한국사입니다. 이 가운데 선택과목도 있는 영역은 국어(화법과 작문/언어와 매체)와 수학(확률과 통계/미적분/기하)입니다. 두 영역은 문제지 전체를 올려놓고 응시하되 본인이 선택한 과목의 문제지를 확인해야 합니다.",
+ why:{3:"영어는 문형 구분은 있지만 선택과목이 없습니다.",4:"한국사는 문형 구분은 있지만 선택과목이 없습니다.",5:"탐구는 선택과목은 있지만 문형 구분이 없는 단일형입니다."},
+ ref:"2. 시험 당일 일반 유의사항 자(교시별 문형 표) / 8. 수험생 필수 확인 사항"},
+{n:"단답형 2",type:"pick",pts:15,q:"수능시험장에 반드시 가져가야 할 것을 모두 고르시오.",hint:"맞게 고른 것마다 5점(3개 이상이면 15점), 가져가면 안 되는 것을 고르면 5점 감점",
+ opts:["수험표","신분증","아날로그 시계","점심 도시락","마실 물","검은색 컴퓨터용 사인펜","흰색 수정테이프","개인 샤프","디지털 손목시계","휴대폰(전원 끔)"],correct:[1,2,3,4,5],neutral:[6,7],wrong:[8,9,10],each:5,
+ exp:"수험표와 사진이 붙은 신분증은 반드시 지참해야 합니다. 시험장에서는 점심과 음용수를 주지 않고 시험실에 시계도 없으므로, 도시락·물·아날로그 시계를 미리 준비해야 합니다.",
+ why:{6:"가져가도 되지만, 1교시 전에 시험실에서 일괄 지급하므로 '반드시' 챙길 물품은 아닙니다(감점 없음).",7:"가져가도 되지만, 시험실별로 준비되어 감독관에게 요청해 쓸 수 있으므로 '반드시' 챙길 물품은 아닙니다(감점 없음).",8:"샤프는 감독관이 일괄 지급하며 개인 샤프는 휴대할 수 없습니다.",9:"전자식 화면표시기가 있는 시계는 반입 금지 물품입니다.",10:"휴대폰은 전원을 꺼도 반입 금지 물품입니다. 가져왔다면 1교시 전에 제출해야 합니다."},
+ ref:"2. 시험 당일 일반 유의사항 라·마 / 8. 수험생 필수 확인 사항"}
+];
+const MAX=Q.reduce((s,q)=>s+q.pts,0);
+const ans={};let graded=false,view="all";
+const $=s=>document.querySelector(s);
+const qs=$("#qs");$("#tot").textContent=Q.length;
+
+function sel(i){return ans[i]||(Q[i].type==="single"?null:[])}
+function answered(i){const a=ans[i];return Q[i].type==="single"?a!=null:(a&&a.length>0)}
+function score(i){
+  const q=Q[i],a=sel(i);
+  if(q.type==="single")return a===q.ans?q.pts:0;
+  if(q.type==="multi"){const s=[...a].sort().join(),t=[...q.ans].sort().join();return s===t?q.pts:0}
+  const good=a.filter(x=>q.correct.includes(x)).length,bad=a.filter(x=>q.wrong.includes(x)).length;
+  return Math.max(0,Math.min(q.pts,good*q.each)-bad*q.each);
+}
+function isAns(q,k){return q.type==="single"?q.ans===k:q.type==="multi"?q.ans.includes(k):q.correct.includes(k)}
+function esc(s){return s}
+
+function render(){
+  qs.innerHTML="";
+  Q.forEach((q,i)=>{
+    const pts=graded?score(i):0,full=pts===q.pts;
+    if(graded&&view==="wrong"&&full)return;
+    const el=document.createElement("section");el.className="q";el.id="q"+i;
+    const sa=typeof q.n!=="number";
+    let h=`<div class="q-head"><span class="q-no${sa?" sa":""}">${sa?q.n:q.n+"."}</span><div class="q-text">${q.q} <span class="pts">[${q.pts}점]</span></div></div>`;
+    if(q.hint)h+=`<div class="hint">${q.hint}</div>`;
+    const grid=q.type==="pick";
+    h+=`<div class="opts${grid?" grid":""}">`;
+    q.opts.forEach((o,j)=>{
+      const k=j+1,a=sel(i),on=q.type==="single"?a===k:a.includes(k);
+      let cls="opt",tag="";
+      if(graded){
+        if(isAns(q,k)){cls+=" is-ans";tag=`<span class="tag g">정답</span>`}
+        else if(on&&q.neutral&&q.neutral.includes(k)){cls+=" is-neutral";tag=`<span class="tag n">감점 없음</span>`}
+        else if(on){cls+=" is-wrong";tag=`<span class="tag b">내 답</span>`}
+        if(on&&isAns(q,k))tag=`<span class="tag g">내 답 · 정답</span>`;
+      }
+      h+=`<button class="${cls}" data-q="${i}" data-k="${k}" aria-pressed="${on}" ${graded?"disabled":""}><span class="bub">${grid?"":C[j]}</span><span>${o}${tag}</span></button>`;
+    });
+    h+=`</div>`;
+    if(graded){
+      const st=full?["ok","○","정답"]:pts>0?["pt","△","부분 점수"]:["no","✕",answered(i)?"오답":"무응답"];
+      h+=`<div class="verdict ${st[0]}"><span class="stamp">${st[1]}</span>${st[2]} · ${pts} / ${q.pts}점</div>`;
+      const a=sel(i),mine=q.type==="single"?(a?[a]:[]):a;
+      let li="";Object.keys(q.why||{}).forEach(k=>{k=+k;const lab=grid?q.opts[k-1]:C[k-1];li+=`<li class="${mine.includes(k)?"mine":""}"><b>${grid?"·":lab}</b><span>${grid?`<b>${lab}</b> `:""}${q.why[k]}</span></li>`});
+      h+=`<div class="exp"><p class="lead">${q.exp}</p>${li?`<ul>${li}</ul>`:""}${q.extra?`<p>${q.extra}</p>`:""}<div class="ref"><b>근거</b> 경기도교육청 수험생 유의사항 · ${q.ref}</div></div>`;
+    }
+    el.innerHTML=h;qs.appendChild(el);
+  });
+  if(graded&&view==="wrong"&&!qs.children.length)qs.innerHTML=`<section class="q"><div class="verdict ok"><span class="stamp">○</span>틀린 문항이 없습니다. 만점입니다.</div></section>`;
+  progress();
+}
+qs.addEventListener("click",e=>{
+  const b=e.target.closest(".opt");if(!b||graded)return;
+  const i=+b.dataset.q,k=+b.dataset.k,q=Q[i];
+  if(q.type==="single")ans[i]=ans[i]===k?null:k;
+  else{const a=sel(i).slice(),p=a.indexOf(k);p<0?a.push(k):a.splice(p,1);ans[i]=a}
+  $("#warn").hidden=true;render();
+});
+function progress(){
+  if(!$("#cnt"))return;
+  const n=Q.filter((_,i)=>answered(i)).length;$("#cnt").textContent=n;$("#trk").style.width=(n/Q.length*100)+"%";
+}
+function hist(){try{return JSON.parse(localStorage.getItem("sn27-hist")||"[]")}catch(e){return[]}}
+function saveHist(s){try{const h=hist();h.unshift({s,t:Date.now()});localStorage.setItem("sn27-hist",JSON.stringify(h.slice(0,5)))}catch(e){}}
+
+function grade(){
+  graded=true;view="all";
+  const total=Q.reduce((s,_,i)=>s+score(i),0);saveHist(total);
+  const nm=[$("#f-ban").value&&$("#f-ban").value+"반",$("#f-no").value&&$("#f-no").value+"번",$("#f-name").value].filter(Boolean).join(" ");
+  const wrong=Q.map((q,i)=>({q,i,p:score(i)})).filter(x=>x.p<x.q.pts);
+  const msg=total===MAX?"만점입니다. 수능 당일 이대로만 하면 됩니다.":total>=80?"대부분 알고 있습니다. 틀린 문항의 근거만 다시 확인하세요.":"수능 당일 불이익을 받을 수 있는 항목이 남아 있습니다. 해설을 꼭 읽어 보세요.";
+  const chips=wrong.map(x=>`<button class="chip ${x.p>0?"pt":"no"}" data-go="${x.i}">${typeof x.q.n==="number"?x.q.n+"번":x.q.n}</button>`).join("");
+  const h=hist().slice(1).map(x=>`<b>${x.s}</b>`).join(" · ");
+  const r=$("#result");r.hidden=false;
+  r.innerHTML=`<div class="result"><div class="score">${total}<small> / ${MAX}</small></div><div><h2>${nm?nm+" · ":""}채점 결과</h2><p>${msg}</p><p style="margin-top:6px">정답 ${Q.length-wrong.length}문항 · 틀리거나 부분 점수 ${wrong.length}문항</p>${wrong.length?`<div class="chips">${chips}</div>`:""}</div>${h?`<div class="history">이전 응시 점수(최근순): ${h}</div>`:""}</div>`;
+  r.className="";$("#tools").hidden=false;$("#notice").hidden=true;
+  setView("all");
+  $("#submit").textContent="다시 풀기";$("#prog").innerHTML=`<span>점수 <b>${total}</b> / <b>${MAX}</b> · 틀린 문항 해설을 확인하세요</span>`;
+  r.scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("#result").addEventListener("click",e=>{const c=e.target.closest("[data-go]");if(!c)return;if(view==="wrong")setView("all");document.getElementById("q"+c.dataset.go).scrollIntoView({behavior:"smooth",block:"start"})});
+function setView(v){view=v;$("#v-all").setAttribute("aria-pressed",v==="all");$("#v-wrong").setAttribute("aria-pressed",v==="wrong");render()}
+$("#v-all").onclick=()=>setView("all");$("#v-wrong").onclick=()=>setView("wrong");
+
+function reset(){
+  for(const k in ans)delete ans[k];graded=false;
+  $("#result").hidden=true;$("#tools").hidden=true;$("#notice").hidden=false;
+  $("#prog").innerHTML=`<span>응답 <b id="cnt">0</b> / <b id="tot">${Q.length}</b></span><div class="track"><i id="trk"></i></div>`;
+  $("#submit").textContent="제출하고 채점하기";render();window.scrollTo({top:0,behavior:"smooth"});
+}
+$("#submit").onclick=()=>{
+  if(graded)return reset();
+  const miss=Q.map((q,i)=>answered(i)?null:(typeof q.n==="number"?q.n+"번":q.n)).filter(Boolean);
+  if(miss.length){const w=$("#warn");w.hidden=false;w.innerHTML=`<span>답하지 않은 문항: ${miss.join(", ")}</span><button class="btn ghost" id="go-miss">그 문항으로 가기</button><button class="btn" id="force">그대로 제출</button>`;
+    $("#go-miss").onclick=()=>{const i=Q.findIndex((_,i)=>!answered(i));document.getElementById("q"+i).scrollIntoView({behavior:"smooth",block:"start"})};
+    $("#force").onclick=()=>{w.hidden=true;grade()};return}
+  grade();
+};
+render();
+</script>
+
+</body>
+</html>
